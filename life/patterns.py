@@ -1,10 +1,9 @@
-from .models import Cell, CellStatus
+from .models import Cell, CellStatus, Point
 
 
 class CellPatternParser:
-    def set_position(self, x, y):
-        self._x = x
-        self._y = y
+    def set_position(self, position: Point):
+        self.position = position
 
         return self
 
@@ -23,11 +22,10 @@ class CellPatternParser:
 
     def _parse_row(self, cell_row, pattern_row):
         cells = []
-        for cell_column, cell_value in enumerate(pattern_row):
+        for cell_col, cell_value in enumerate(pattern_row):
             if not cell_value.isspace():
-                x = self._x + cell_row
-                y = self._y + cell_column
-                cell = Cell(status=CellStatus.alive, x=x, y=y)
+                cell_pos = Point(row=cell_row, col=cell_col)
+                cell = Cell(status=CellStatus.alive, position=self.position + cell_pos)
                 cells.append(cell)
 
         return cells

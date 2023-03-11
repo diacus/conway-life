@@ -2,7 +2,6 @@ import random
 from itertools import product
 from functools import partial
 from collections import defaultdict
-from copy import deepcopy
 
 from .models import CellStatus, Board
 from .board import BoardFactory
@@ -28,8 +27,7 @@ class World:
     def play(self):
         new_board = (
             BoardFactory()
-            .set_height(self._board.height)
-            .set_width(self._board.width)
+            .set_size(self._board.size)
             .build_board()
         )
 
@@ -48,10 +46,7 @@ class World:
         if cell == CellStatus.dead:
             return CellStatus.alive if neighbors[CellStatus.alive] == 3 else CellStatus.dead
 
-        if neighbors[CellStatus.alive] > 3:
-            return CellStatus.dead
-
-        if neighbors[CellStatus.alive] < 2:
+        if neighbors[CellStatus.alive] > 3 or neighbors[CellStatus.alive] < 2:
             return CellStatus.dead
 
         return CellStatus.alive
@@ -72,8 +67,10 @@ class World:
         source_row, source_col = source
         delta_row, delta_col = delta
 
-        row = (source_row + delta_row) % self._board.height
-        col = (source_col + delta_col) % self._board.width
+        size = self._board.size
+
+        row = (source_row + delta_row) % size.row
+        col = (source_col + delta_col) % size.col
 
         return row, col
 

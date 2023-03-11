@@ -10,48 +10,14 @@ from rich import print
 from life.world import World
 from life.patterns import CellPatternParser
 from life.board import BoardFactory
-
+from scene import load_scene_by_name
 
 app = typer.Typer()
 
-def load_patterns():
-    pwd = Path(__file__).parent
-
-    with open(pwd / "var" / "patterns.json") as stream:
-        patterns = json.load(stream)
-
-    return patterns
-
 
 @app.command()
-def play(width: int = 80, height: int = 25):
-    patterns = load_patterns()
-    glider_pattern = patterns["glider"]
-
-    pattern_1 = (
-        CellPatternParser()
-        .set_position(glider_pattern["location"]["x"], glider_pattern["location"]["y"])
-        .set_pattern(glider_pattern["pattern"])
-        .parse_cell_pattern()
-    )
-
-    pattern_2 = (
-        CellPatternParser()
-        .set_position(10, 4)
-        .set_pattern(glider_pattern["pattern"])
-        .parse_cell_pattern()
-    )
-
-    board = (
-        BoardFactory()
-        .set_width(width)
-        .set_height(height)
-        .add_pattern(pattern_1)
-        .add_pattern(pattern_2)
-        .build_board()
-    )
-
-    world = World().set_board(board)
+def play():
+    world = load_scene_by_name("space-ships")
     try:
         while world.has_life():
             os.system("clear")

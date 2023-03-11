@@ -16,10 +16,17 @@ class CellStatus(Enum):
         return self.value
 
 
+class Point(BaseModel):
+    row: int
+    col: int
+
+    def __add__(self, other):
+        return Point(row=self.row + other.row, col=self.col + other.col)
+
+
 class Cell(BaseModel):
     status: CellStatus
-    x: int
-    y: int
+    position: Point
 
 
 class BoardRow(UserList):
@@ -59,14 +66,13 @@ class BoardRow(UserList):
 
 
 class Board(UserList):
-    def __init__(self, *args, width: int = 0, height: int = 0, **kwargs):
-        self.width = width
-        self.height = height
+    def __init__(self, *args, size: Point = Point(row=0, col=0), **kwargs):
+        self.size=size
         super().__init__(*args, **kwargs)
 
     def __setitem__(self, index: int, item: CellStatus):
         self._validate(item)
-        self.data[index] = item
+        self.data[index % self.size.row] = item
 
     def __str__(self):
         return "\n".join(map(str, self.data))
@@ -97,7 +103,7 @@ class Board(UserList):
 
     def insert(self, index: int, item: CellStatus):
         self._validate(item)
-        self.data.insert(index, item)
+        self.data.insert(index % self.size.col, item)
 
     def get_life_count(self):
         life_count_per_row = map(lambda row: row.get_life_count(), self.data)

@@ -1,19 +1,19 @@
-from .models import CellStatus, Cell, Board
+from .models import CellStatus, Cell, Board, Point
 
 class BoardFactory:
     def __init__(self):
-        self._width = 0
-        self._height = 0
+        self.size = Point(row=0, col=0)
         self._cells = []
 
     def build_board(self):
-        cells = [[CellStatus.dead] * self._width] * self._height
-        new_board = Board(width=self._width, height=self._height)
+        width, height = self.size.col, self.size.row
+        cells = [[CellStatus.dead] * width] * height
+        new_board = Board(size=self.size)
         new_board.extend(cells)
 
         if self._cells:
             for cell in self._cells:
-                new_board[cell.x][cell.y] = cell.status
+                new_board[cell.position.row % height][cell.position.col % width] = cell.status
 
         return new_board
 
@@ -22,12 +22,7 @@ class BoardFactory:
 
         return self
 
-    def set_width(self, width: int):
-        self._width = width
-
-        return self
-
-    def set_height(self, height: int):
-        self._height = height
+    def set_size(self, size: Point):
+        self.size = size
 
         return self
