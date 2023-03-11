@@ -1,20 +1,21 @@
-from .models import CellState, Cell, Board
+from .models import CellStatus, Cell, Board
 
 class BoardFactory:
     def __init__(self):
         self._width = 0
         self._height = 0
-        self._size = 0
         self._cells = []
 
     def build_board(self):
-        cells = [CellState.dead] * self._size
+        cells = [[CellStatus.dead] * self._width] * self._height
+        new_board = Board(width=self._width, height=self._height)
+        new_board.extend(cells)
 
-        for cell in self._cells:
-            index = (cell.y % self._height) * self._width + (cell.x % self._width)
-            cells[index] = CellState.alive
+        if self._cells:
+            for cell in self._cells:
+                new_board[cell.x][cell.y] = cell.status
 
-        return Board(cells=cells, width=self._width, height=self._height)
+        return new_board
 
     def add_pattern(self, pattern: list[Cell]):
         self._cells.extend(pattern)
@@ -23,12 +24,10 @@ class BoardFactory:
 
     def set_width(self, width: int):
         self._width = width
-        self._size = self._width * self._height
 
         return self
 
     def set_height(self, height: int):
         self._height = height
-        self._size = self._width * self._height
 
         return self

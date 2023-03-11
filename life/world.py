@@ -1,11 +1,11 @@
-import pdb
 import random
 from itertools import product
 from functools import partial
 from collections import defaultdict
 from copy import deepcopy
 
-from .models import CellState, Board
+from .models import CellStatus, Board
+from .board import BoardFactory
 
 
 class World:
@@ -14,51 +14,50 @@ class World:
         self._deltas = [vector for vector in product([-1, 0, 1], [-1, 0, 1]) if not vector == (0, 0)]
 
     def __str__(self):
-        cells = deepcopy(self._board).cells
-        lines = []
-        while cells:
-            line, cells = cells[:self._board.width], cells[self._board.width:]
-            lines.append("".join(map(str, line)))
-
-        return "\n".join(lines)
+        return str(self._board)
 
     def has_life(self):
-        cells_alive = [cell for cell in self._board.cells if cell == CellState.alive]
-        return len(cells_alive) > 0
+        cells_alive = self._board.get_life_count()
+        return cells_alive > 0
 
-    def set_board(self, board: list[CellState]):
+    def set_board(self, board: list[CellStatus]):
         self._board = board
 
         return self
 
     def play(self):
-        pdb.set_trace()
-        new_cells = [
-            self._get_next_cell_value(index, cell)
-            for index, cell in enumerate(self._board.cells)
-        ]
+        new_board = (
+            BoardFactory()
+            .set_height(self._board.height)
+            .set_width(self._board.width)
+            .build_board()
+        )
 
-        new_board = Board(cells=new_cells, width=self._board.width, height=self._board.height)
+        for row_number, row in enumerate(self._board):
+            for column_number, cell_status in enumerate(row):
+                new_cell_status = self._get_next_cell_value(row_number, column_number, cell_status)
+                new_board[row_number][column_number] = new_cell_status
+
         self._board = new_board
 
         return self
 
-    def _get_next_cell_value(self, index, cell):
-        neighbors = self._get_neighbors(index)
+    def _get_next_cell_value(self, row, column, cell):
+        neighbors = self._get_neighbors(row, column)
 
-        if cell == CellState.dead:
-            return CellState.alive if neighbors[CellState.alive] == 3 else CellState.dead
+        if cell == CellStatus.dead:
+            return CellStatus.alive if neighbors[CellStatus.alive] == 3 else CellStatus.dead
 
-        if neighbors[CellState.alive] > 3:
-            return CellState.dead
+        if neighbors[CellStatus.alive] > 3:
+            return CellStatus.dead
 
-        if neighbors[CellState.alive] < 2:
-            return CellState.dead
+        if neighbors[CellStatus.alive] < 2:
+            return CellStatus.dead
 
-        return CellState.alive
+        return CellStatus.alive
 
-    def _get_neighbors(self, cell_number) -> list[bool]:
-        cell_coordinates = self._get_coordinates(cell_number)
+    def _get_neighbors(self, row, column) -> list[bool]:
+        cell_coordinates = row, column
         move_from_cell = partial(self._get_vector_sum, cell_coordinates)
         neighborhood = map(move_from_cell, self._deltas)
 
@@ -69,23 +68,15 @@ class World:
 
         return neighbors
 
-    def _get_coordinates(self, cell_number: int) -> (int, int):
-        xpos = cell_number % self._board.height
-        ypos = int(cell_number / self._board.width)
+    def _get_vector_sum(self, source: (int, int), delta: (int, int)) -> (int, int):
+        source_row, source_col = source
+        delta_row, delta_col = delta
 
-        return xpos, ypos
+        row = (source_row + delta_row) % self._board.height
+        col = (source_col + delta_col) % self._board.width
 
-    def _get_vector_sum(self, a: (int, int), b: (int, int)) -> (int, int):
-        x1, y1 = a
-        x2, y2 = b
-
-        x = (x1 + x2) % self._board.width
-        y = (y1 + y2) % self._board.height
-
-        return x, y
+        return row, col
 
     def _get_value_at_coordinate(self, coordinate):
-        x, y = coordinate
-        index = self._board.width * y + x
-
-        return self._board.cells[index]
+        row, col = coordinate
+        return self._board[row][col]

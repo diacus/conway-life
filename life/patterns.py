@@ -1,4 +1,4 @@
-from .models import Cell, CellState
+from .models import Cell, CellStatus
 
 
 class CellPatternParser:
@@ -25,9 +25,9 @@ class CellPatternParser:
         cells = []
         for cell_column, cell_value in enumerate(pattern_row):
             if not cell_value.isspace():
-                x = self._x + cell_column
-                y = self._y + cell_row
-                cell = Cell(state=CellState.alive, x=x, y=y)
+                x = self._x + cell_row
+                y = self._y + cell_column
+                cell = Cell(status=CellStatus.alive, x=x, y=y)
                 cells.append(cell)
 
         return cells
