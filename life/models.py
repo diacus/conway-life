@@ -10,18 +10,30 @@ from pydantic import BaseModel
 
 class CellStatus(Enum):
     alive = "█"
-    dead = "░"
+    dead = " " # or "░"
 
     def __str__(self):
         return self.value
+
+    def is_alive(self):
+        return self == CellStatus.alive
 
 
 class Point(BaseModel):
     row: int
     col: int
 
+    def __key(self):
+        return (self.row, self.col)
+
     def __add__(self, other):
         return Point(row=self.row + other.row, col=self.col + other.col)
+
+    def __eq__(p, q):
+        return isinstance(q, p.__class__) and p.__key() == y.__key()
+
+    def __hash__(self):
+        return hash(self.__key())
 
 
 class Cell(BaseModel):

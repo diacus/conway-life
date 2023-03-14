@@ -12,18 +12,20 @@ from life.patterns import CellPatternParser
 from life.board import BoardFactory
 from scene import load_scene_by_name
 
+from gui.scene import Scene as GuiScene
+
 app = typer.Typer()
 
 
 @app.command()
-def play():
-    world = load_scene_by_name("space-ships")
+def play(scene_name: str):
+    world = load_scene_by_name(scene_name)
+    scene = GuiScene()
     try:
-        while world.has_life():
+        while world.has_life() and not scene.should_quit:
             os.system("clear")
-            print(world)
+            scene.draw(world.board)
             world = world.play()
-            sleep(0.15)
 
         print("there is no live now")
 

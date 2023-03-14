@@ -9,34 +9,34 @@ from .board import BoardFactory
 
 class World:
     def __init__(self):
-        self._board = None
+        self.board = None
         self._deltas = [vector for vector in product([-1, 0, 1], [-1, 0, 1]) if not vector == (0, 0)]
 
     def __str__(self):
-        return str(self._board)
+        return str(self.board)
 
     def has_life(self):
-        cells_alive = self._board.get_life_count()
+        cells_alive = self.board.get_life_count()
         return cells_alive > 0
 
     def set_board(self, board: list[CellStatus]):
-        self._board = board
+        self.board = board
 
         return self
 
     def play(self):
         new_board = (
             BoardFactory()
-            .set_size(self._board.size)
+            .set_size(self.board.size)
             .build_board()
         )
 
-        for row_number, row in enumerate(self._board):
+        for row_number, row in enumerate(self.board):
             for column_number, cell_status in enumerate(row):
                 new_cell_status = self._get_next_cell_value(row_number, column_number, cell_status)
                 new_board[row_number][column_number] = new_cell_status
 
-        self._board = new_board
+        self.board = new_board
 
         return self
 
@@ -67,7 +67,7 @@ class World:
         source_row, source_col = source
         delta_row, delta_col = delta
 
-        size = self._board.size
+        size = self.board.size
 
         row = (source_row + delta_row) % size.row
         col = (source_col + delta_col) % size.col
@@ -76,4 +76,4 @@ class World:
 
     def _get_value_at_coordinate(self, coordinate):
         row, col = coordinate
-        return self._board[row][col]
+        return self.board[row][col]
