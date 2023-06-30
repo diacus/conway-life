@@ -3,6 +3,8 @@ from itertools import product
 from functools import partial
 from collections import defaultdict
 
+from tools import time_it
+
 from .models import CellStatus, Board
 from .board import BoardFactory
 
@@ -24,6 +26,7 @@ class World:
 
         return self
 
+    @time_it
     def play(self):
         new_board = (
             BoardFactory()

@@ -1,3 +1,4 @@
+from tools import  time_it
 from .models import CellStatus, Cell, Board, Point
 
 class BoardFactory:
@@ -5,6 +6,7 @@ class BoardFactory:
         self.size = Point(row=0, col=0)
         self._cells = []
 
+    @time_it
     def build_board(self):
         width, height = self.size.col, self.size.row
         cells = [[CellStatus.dead] * width] * height
